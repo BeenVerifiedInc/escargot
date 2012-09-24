@@ -44,7 +44,7 @@ module Escargot
       query_dsl = query.delete(:query_dsl)
       query = {:query => query} if (query_dsl.nil? || query_dsl)
     end
-    $elastic_search_client.search(query, options)
+    Escargot.connection.search(query, options)
   end
 
   # search returns a will_paginate collection of ActiveRecord objects for the search results
@@ -72,23 +72,44 @@ module Escargot
       end
       options = options.merge({:index => models.map(&:index_name).join(',')})
     end
-    $elastic_search_client.count(query, options)
+    Escargot.connection.count(query, options)
+  end
+  
+  def self.establish_connection
+    unless File.exists?(Configuration.app_root + "/config/elasticsearch.yml")
+      Rails.logger.warn("No config/elastic_search.yaml file found, connecting to localhost:9200") if defined?(Rails)
+      $elastic_search_client = ElasticSearch.new("localhost:9200")
+    else
+      config = YAML.load_file(Configuration.app_root + "/config/elasticsearch.yml")
+      $elastic_search_client = ElasticSearch.new(config["host"] + ":" + config["port"].to_s, :timeout => 20)
+    end
+    
+    return $elastic_search_client
+  end
+    
+  def self.reconnect!
+    $elastic_search_client.disconnect! rescue
+    establish_connection
   end
 
   private
-    def self.register_all_models
-      models = []
-      # Search all Models in the application Rails
-      Dir[File.join("#{Configuration.app_root}/app/models".split(/\\/), "**", "*.rb")].each do |file|
-        model = file.gsub(/#{Configuration.app_root}\/app\/models\/(.*?)\.rb/,'\1').classify.constantize
-        unless models.include?(model)
-          require file
-        end
-        models << model
+
+  def self.register_all_models
+    models = []
+    # Search all Models in the application Rails
+    Dir[File.join("#{Configuration.app_root}/app/models".split(/\\/), "**", "*.rb")].each do |file|
+      model = file.gsub(/#{Configuration.app_root}\/app\/models\/(.*?)\.rb/,'\1').classify.constantize
+      unless models.include?(model)
+        require file
       end
+      models << model
     end
-
-
+  end
+    
+  def self.connection
+    $elastic_search_client || establish_connection
+  end
+    
 end
 
 
