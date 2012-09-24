@@ -91,25 +91,23 @@ module Escargot
     $elastic_search_client.disconnect! rescue
     establish_connection
   end
-
-  private
-
-  def self.register_all_models
-    models = []
-    # Search all Models in the application Rails
-    Dir[File.join("#{Configuration.app_root}/app/models".split(/\\/), "**", "*.rb")].each do |file|
-      model = file.gsub(/#{Configuration.app_root}\/app\/models\/(.*?)\.rb/,'\1').classify.constantize
-      unless models.include?(model)
-        require file
-      end
-      models << model
-    end
-  end
-    
+  
   def self.connection
     $elastic_search_client || establish_connection
   end
-    
+  
+  private
+    def self.register_all_models
+      models = []
+      # Search all Models in the application Rails
+      Dir[File.join("#{Configuration.app_root}/app/models".split(/\\/), "**", "*.rb")].each do |file|
+        model = file.gsub(/#{Configuration.app_root}\/app\/models\/(.*?)\.rb/,'\1').classify.constantize
+        unless models.include?(model)
+          require file
+        end
+        models << model
+      end
+    end
 end
 
 
