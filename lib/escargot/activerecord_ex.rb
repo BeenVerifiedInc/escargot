@@ -5,7 +5,7 @@ module Escargot
 
     def self.included(base)
       base.send :extend, ClassMethods
-      base.class_eval("class << self; alias :search :elastic_search; end")
+      base.class_eval("class << self; alias :elastic_search :search; end")
     end
 
     module ClassMethods
@@ -52,7 +52,7 @@ module Escargot
         @mapping = options[:mapping] || false
       end
       
-      def elastic_search(query, options={})
+      def search(query, options={})
         Escargot.search(query, options.merge({:index => self.index_name, :type => elastic_search_type}), true)
       end
       
