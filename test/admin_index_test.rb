@@ -14,10 +14,10 @@ class AdminIndexTest < Test::Unit::TestCase
     end
     User.refresh_index
     sleep(1)
-    assert $elastic_search_client.index_versions(index).size > 1
-    assert $elastic_search_client.index_versions(index).include? $elastic_search_client.current_index_version(index)
-    $elastic_search_client.prune_index_versions(index)
-    assert $elastic_search_client.index_versions(index).size == 1
+    assert Escargot.connection.index_versions(index).size > 1
+    assert Escargot.connection.index_versions(index).include? Escargot.connection.current_index_version(index)
+    Escargot.connection.prune_index_versions(index)
+    assert Escargot.connection.index_versions(index).size == 1
   end
 
   def teardown
