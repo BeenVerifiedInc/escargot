@@ -46,6 +46,24 @@ module Escargot
     end
     Escargot.connection.search(query, options)
   end
+  
+  def self.search_api(query, options = {}, call_by_instance_method = false)
+    unless call_by_instance_method
+      if (options[:classes])
+        models = Array(options[:classes])
+      else
+        register_all_models
+        models = @indexed_models
+      end
+      options = options.merge({:index => models.map(&:index_name).join(',')})
+    end
+    
+    if query.kind_of?(Hash)
+      query_dsl = query.delete(:query_dsl)
+      # query = {:query => query} if (query_dsl.nil? || query_dsl)
+    end
+    Escargot.connection.search(query, options)
+  end
 
   # search returns a will_paginate collection of ActiveRecord objects for the search results
   #
@@ -54,7 +72,11 @@ module Escargot
   # note that the collection may include nils if ElasticSearch returns a result hit for a
   # record that has been deleted on the database  
   def self.search(query, options = {}, call_by_instance_method = false)
-    hits = Escargot.search_hits(query, options, call_by_instance_method)
+    if options[:method] == :search_api
+      hits = Escargot.search_api(query, options, call_by_instance_method)
+    else
+      hits = Escargot.search_hits(query, options, call_by_instance_method)
+    end
     hits_ar = hits.map{|hit| hit.to_activerecord}
     results = WillPaginate::Collection.new(hits.current_page, hits.per_page, hits.total_entries)
     results.replace(hits_ar)
