@@ -18,7 +18,7 @@ module Escargot
     class IndexDocuments
       @queue = :indexing
 
-      def self.perform(model_name, ids, index_version)
+      def self.perform(model_name, ids)
         model = model_name.constantize
         model.find(:all, :conditions => {model.primary_key => ids}).each do |record|
           record.local_index_in_elastic_search
