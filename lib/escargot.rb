@@ -102,7 +102,7 @@ module Escargot
       Rails.logger.warn("No config/elastic_search.yaml file found, connecting to localhost:9200") if defined?(Rails)
       $elastic_search_client = ElasticSearch.new("localhost:9200")
     else
-      config = YAML.load_file(Configuration.app_root + "/config/elasticsearch.yml")
+      config = YAML.load_file(  File.join( Configuration.app_root, "/config/elasticsearch.yml" )  )
       $elastic_search_client = ElasticSearch.new(config["host"] + ":" + config["port"].to_s, :timeout => 20)
     end
     
