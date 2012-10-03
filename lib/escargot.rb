@@ -98,16 +98,11 @@ module Escargot
   end
   
   def self.establish_connection
-    app_config_file = File.join( Configuration.app_root, "/config/elasticsearch.yml" )
-    unless File.exists?(  app_config_file  )
-      Rails.logger.warn("No config/elastic_search.yaml file found, connecting to localhost:9200") if defined?(Rails)
-      $elastic_search_client = ElasticSearch.new("localhost:9200")
-    else
-      config = YAML.load_file(  app_config_file  )
-      $elastic_search_client = ElasticSearch.new(config["host"] + ":" + config["port"].to_s, :timeout => 20)
+    if defined?(Rails) && !Configuration.user_configuration
+      Rails.logger.warn("No config/elastic_search.yaml file found, connecting to localhost:9200")
     end
-    
-    return $elastic_search_client
+    config = Configuration.settings
+    $elastic_search_client = ElasticSearch.new(config["host"] + ":" + config["port"].to_s, :timeout => config["timeout"])    
   end
     
   def self.reconnect!
