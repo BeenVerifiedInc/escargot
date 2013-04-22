@@ -36,13 +36,18 @@ module Escargot
       def self.perform(model_name, ids)
         model = model_name.constantize
         ids_found = []
-        model.find(:all, :conditions => {:id => ids}).each do |record|
+        model.find_all_by_id(ids).each do |record|
           record.local_index_in_elastic_search
           ids_found << record.id
         end
 
         (ids - ids_found).each do |id|
-          model.delete_id_from_index(id)
+          begin
+            model.delete_id_from_index(id)
+          rescue
+            # Since we're in a resque job here, maybe something else already cleaned this guy up.
+            # Don't crash if it's already been deleted elsewhere.
+          end
         end
       end
     end
