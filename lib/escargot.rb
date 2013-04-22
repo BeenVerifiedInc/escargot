@@ -111,7 +111,7 @@ module Escargot
   end
   
   def self.disconnect!
-    $elastic_search_client.disconnect! rescue
+    $elastic_search_client.disconnect! rescue false
   end
   
   def self.connection
