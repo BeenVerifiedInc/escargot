@@ -106,8 +106,12 @@ module Escargot
   end
     
   def self.reconnect!
-    $elastic_search_client.disconnect! rescue
+    disconnect!
     establish_connection
+  end
+  
+  def self.disconnect!
+    $elastic_search_client.disconnect! rescue
   end
   
   def self.connection
