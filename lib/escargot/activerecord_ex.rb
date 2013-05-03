@@ -131,7 +131,7 @@ module Escargot
       def delete_id_from_index(id, options = {})
         options[:index] ||= self.index_name
         options[:type]  ||= elastic_search_type
-        Escargot.connection.delete(id.to_s, options)
+        Escargot.connection.delete(id.to_s, options) unless id.blank?
       end
       
       def optimize_index

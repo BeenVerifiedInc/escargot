@@ -41,7 +41,7 @@ module Escargot
           ids_found << record.id
         end
 
-        (ids - ids_found).each do |id|
+        (ids - ids_found).compact.each do |id|
           begin
             model.delete_id_from_index(id)
           rescue
