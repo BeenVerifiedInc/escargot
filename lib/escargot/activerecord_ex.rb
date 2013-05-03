@@ -129,9 +129,12 @@ module Escargot
       end
       
       def delete_id_from_index(id, options = {})
+        # If you continue any further here with a blank value, you'll destroy the entire index
+        return false if id.blank?
+        
         options[:index] ||= self.index_name
         options[:type]  ||= elastic_search_type
-        Escargot.connection.delete(id.to_s, options) unless id.blank?
+        Escargot.connection.delete(id.to_s, options)
       end
       
       def optimize_index
