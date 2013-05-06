@@ -30,8 +30,6 @@ namespace :escargot do
     end
   end
   
-  
-  
   desc "prunes old index versions for this models"
   task :prune_versions, :models, :needs => [:environment, :load_all_models] do |t, args|
     each_indexed_model(args) do |model|
@@ -41,12 +39,12 @@ namespace :escargot do
   
   task :load_all_models do
     models = ActiveRecord::Base.send(:subclasses)
-    Dir["#{Rails.root}/app/models/*.rb", "#{Rails.root}/app/models/*/*.rb"].each do |file|
+    Dir["#{Escargot::Configuration.app_root}/app/models/*.rb", "#{Escargot::Configuration.app_root}/app/models/*/*.rb"].each do |file|
       model = File.basename(file, ".*").classify
       unless models.include?(model)
         require file
       end
-      models << model 
+      models << model
     end
   end
   
