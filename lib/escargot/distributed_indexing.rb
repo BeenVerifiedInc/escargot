@@ -24,9 +24,11 @@ module Escargot
 
       def self.perform(model_name, ids, index_version)
         model = model_name.constantize
-        model.find(:all, :conditions => {model.primary_key => ids}).each do |record|
-          record.local_index_in_elastic_search(:index => index_version)
-        end
+        # model.find(:all, :conditions => {model.primary_key => ids}).each do |record|
+        #   record.local_index_in_elastic_search(:index => index_version)
+        # end
+        batch = model.find(:all, :conditions => { model.primary_key => ids })
+        LocalIndexing.batch_index_records(batch, model, index_version)
       end
     end
 

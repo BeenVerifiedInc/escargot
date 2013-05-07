@@ -14,6 +14,21 @@ module Escargot
 
       Escargot.connection.deploy_index_version(model.index_name, index_version)
     end
+    
+    def LocalIndexing.batch_index_records(batch, model, index_version = nil)
+      Escargot.connection.bulk do |bulk_client|
+        batch.each do |record|
+          options = { }
+          options[:index] ||= (index_version || model.index_name)
+          options[:type]  ||= model.name.underscore.singularize.gsub(/\//,'-')
+          options[:id]    ||= record.id.to_s
+          
+          object_hash = record.respond_to?(:indexed_object_hash) ? record.indexed_object_hash : record.to_hash
+          bulk_client.index(object_hash, options)
+        end
+      end
+    end
+    
   end
 
 end
