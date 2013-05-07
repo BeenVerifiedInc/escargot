@@ -1,4 +1,3 @@
-
 module Escargot
 
   module PreAliasDistributedIndexing

@@ -4,6 +4,7 @@ require 'escargot/activerecord_ex'
 require 'escargot/elasticsearch_ex'
 require 'escargot/local_indexing'
 require 'escargot/distributed_indexing'
+require 'escargot/pre_alias_distributed_indexing'
 require 'escargot/queue_backend/base'
 require 'escargot/queue_backend/resque'
 
