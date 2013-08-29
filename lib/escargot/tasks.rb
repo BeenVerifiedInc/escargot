@@ -25,7 +25,14 @@ namespace :escargot do
     each_indexed_model(args) do |model|
       puts "Indexing #{model}"
       index_version = model.create_index_version
-      $elastic_search_client.deploy_index_version(model.index_name, index_version)
+      begin
+        Escargot.connection.deploy_index_version(model.index_name, index_version)
+      rescue => e
+        if e.message.include?("an index exists with the same name as the alias")
+          Escargot.connection.delete_index(model.index_name)
+          retry
+        end
+      end
       Escargot::PreAliasDistributedIndexing.create_index_for_model(model)
     end
   end
