@@ -29,6 +29,12 @@ module Escargot
         # end
         batch = model.find(:all, :conditions => { model.primary_key => ids })
         LocalIndexing.batch_index_records(batch, model, index_version)
+      rescue Exception => e
+        if e.message =~ /SIGTERM/
+          Resque.enqueue(self, model_name, ids, index_version)
+        else
+          raise
+        end
       end
     end
 
@@ -51,6 +57,12 @@ module Escargot
             # Don't crash if it's already been deleted elsewhere.
           end
         end
+      rescue Exception => e
+        if e.message =~ /SIGTERM/
+          Resque.enqueue(self, model_name, ids)
+        else
+          raise
+        end
       end
     end
 
@@ -58,6 +70,12 @@ module Escargot
       @queue = :indexing
       def self.perform(index, index_version)
         Escargot.connection.deploy_index_version(index, index_version)
+      rescue Exception => e
+        if e.message =~ /SIGTERM/
+          Resque.enqueue(self, index, index_version)
+        else
+          raise
+        end
       end
     end
   end

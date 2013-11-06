@@ -29,8 +29,11 @@ namespace :escargot do
         Escargot.connection.deploy_index_version(model.index_name, index_version)
       rescue => e
         if e.message.include?("an index exists with the same name as the alias")
+          puts "Index with the alias name already exists.  Deleting it and trying again..."
           Escargot.connection.delete_index(model.index_name)
           retry
+        else
+          raise
         end
       end
       Escargot::PreAliasDistributedIndexing.create_index_for_model(model)
