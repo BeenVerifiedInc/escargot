@@ -135,8 +135,7 @@ end
 
 
 #-------------------------------------------------------------------------------
-require 'escargot' 
-require 'escargot/rails/init_commun'
+require 'escargot'
 
 # preserve rails 2.x compatibility
 (Rails::VERSION::MAJOR == 3) ? (require 'escargot/rails/railtie') : (require 'escargot/rails/init')
