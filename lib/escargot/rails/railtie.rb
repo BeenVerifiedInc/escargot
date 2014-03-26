@@ -9,7 +9,7 @@ module Escargot
     end
 
     rake_tasks do
-      load 'escargot/tasks/escargot.tasks'
+      load 'escargot/tasks/escargot.rake'
     end
 
     generators do

@@ -20,6 +20,26 @@ namespace :escargot do
     end
   end
   
+  desc "creates a fresh index, puts it live, then starts re-indexing"
+  task :pre_alias_distributed_index, :models, :needs => [:environment, :load_all_models] do |t, args|
+    each_indexed_model(args) do |model|
+      puts "Indexing #{model}"
+      index_version = model.create_index_version
+      begin
+        Escargot.connection.deploy_index_version(model.index_name, index_version)
+      rescue => e
+        if e.message.include?("an index exists with the same name as the alias")
+          puts "Index with the alias name already exists.  Deleting it and trying again..."
+          Escargot.connection.delete_index(model.index_name)
+          retry
+        else
+          raise
+        end
+      end
+      Escargot::PreAliasDistributedIndexing.create_index_for_model(model)
+    end
+  end
+  
   desc "prunes old index versions for this models"
   task :prune_versions, :models, :needs => [:environment, :load_all_models] do |t, args|
     each_indexed_model(args) do |model|
@@ -29,7 +49,7 @@ namespace :escargot do
   
   task :load_all_models do
     models = ActiveRecord::Base.send(:subclasses)
-    Dir["#{Rails.root}/app/models/*.rb", "#{Rails.root}/app/models/*/*.rb"].each do |file|
+    Dir["#{Escargot::Configuration.app_root}/app/models/*.rb", "#{Escargot::Configuration.app_root}/app/models/*/*.rb"].each do |file|
       model = File.basename(file, ".*").classify
       unless models.include?(model)
         require file
