@@ -19,7 +19,7 @@ module Escargot
 
       def self.perform(model_name, ids)
         model = model_name.constantize
-        batch = model.find(:all, :conditions => { model.primary_key => ids })
+        batch = model.where(model.primary_key => ids)
         LocalIndexing.batch_index_records(batch, model)
       rescue Exception => e
         if e.message =~ /SIGTERM/
