@@ -9,7 +9,7 @@ module Escargot
     def PreAliasDistributedIndexing.create_index_for_model(model)
       load_dependencies
 
-      model.find_in_batches(:select => model.primary_key) do |batch|
+      model.select(model.primary_key).find_in_batches do |batch|
         Escargot.queue_backend.enqueue(IndexDocuments, model.to_s, batch.map(&:id))
       end
     end
