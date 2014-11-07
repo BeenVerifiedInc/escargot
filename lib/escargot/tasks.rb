@@ -48,14 +48,7 @@ namespace :escargot do
   end
   
   task :load_all_models do
-    models = ActiveRecord::Base.send(:subclasses)
-    Dir["#{Escargot::Configuration.app_root}/app/models/*.rb", "#{Escargot::Configuration.app_root}/app/models/*/*.rb"].each do |file|
-      model = File.basename(file, ".*").classify
-      unless models.include?(model)
-        require file
-      end
-      models << model
-    end
+    Rails.application.eager_load!
   end
   
   private
